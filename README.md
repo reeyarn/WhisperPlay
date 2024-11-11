@@ -34,6 +34,8 @@ It is a great tool for learning foreign languages.
 - Flask
 - NLTK
 - Bcrypt
+- mlx_whisper for MacOS
+- fast_whisper for Linux with CUDA
 - Other dependencies listed in `requirements.txt`
 
 ### Setup
