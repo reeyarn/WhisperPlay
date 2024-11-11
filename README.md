@@ -14,7 +14,19 @@ It is a great tool for learning foreign languages.
 - **Job Management**: View, update, and delete transcription jobs.
 - **Logging**: Comprehensive logging for debugging and monitoring.
 
+## Interface
+
+### Index Page
+
+![WhisperPlay Screenshot](https://github.com/reeyarn/WhisperPlay/blob/main/screenshots/index.png)
+
+### Transcript Reading Page
+![WhisperPlay Screenshot](https://github.com/reeyarn/WhisperPlay/blob/main/screenshots/transcript.png)
+
+
 ## Installation
+
+
 
 ### Prerequisites
 
