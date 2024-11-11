@@ -82,6 +82,20 @@ It is a great tool for learning foreign languages.
 - **Environment Variables**: Set `CUDA_VISIBLE_DEVICES` to specify which GPU to use.
 - **Application Settings**: Modify `app.config` in `app.py` to change upload and transcript directories, and other settings.
 
+## Preparing MLX Whisper Model
+
+```git clone https://github.com/ml-explore/mlx-examples.git
+python mlx-examples/whisper/convert.py -torch-name-or-path primeline/whisper-large-v3-german --mlx-path mlx_models/whisper-large-v3-german
+```
+## Acknowledgments
+
+We would like to express our gratitude to the following projects for their contributions and inspiration:
+
+
+
+- [whisper_mlx @ ml-explore](https://github.com/ml-explore/): Apple's MLX for MacOS to run OpenAI's Whisper.
+- [fast_whisper](https://github.com/SYSTRAN/faster-whisper/): A project to run efficient transcription processing with CUDA.
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
