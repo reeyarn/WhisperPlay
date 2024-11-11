@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcript -- {{ user }} - {{ filename }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .segment-playing {
+            background-color: #e3f2fd;  /* Light blue background */
+            border-left: 4px solid #2196f3;  /* Blue left border */
+        }
+        .transcript-wrapper {
+            max-height: calc(80vh - 100px); /* Adjust based on your header height */
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .segment-playing {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .segment-container {
+            transition: background-color 0.3s ease;
+        }        
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">{{ transcript.get('title', 'Untitled') }}</h1>
+                <h2 class="text-xl g-gray-500">使用 P 或 Space 播放/暂停</h2> 
+                <p class="text-gray-600 mt-2">File: {{ filename }}</p>
+            </div>
+        </div>
+
+
+
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl">Transcript: </h2>
+            <a href="/" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                Back to List
+            </a>
+
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Transcript metadata -->
+            <div class="mb-6 pb-4 border-b">
+                <p class="text-gray-600">
+                    <span class="font-semibold">Duration:</span> 
+                    {{ "%.2f"|format(transcript.segments[-1].end / 60) }} minutes
+                </p>
+            </div>
+
+            <!-- Transcript content -->
+            <div class="transcript-wrapper">
+            <div class="space-y-4" id="transcriptContainer" style="display: none;">
+                {% for segment in transcript.segments %}
+                <div class="segment-container hover:bg-gray-50 p-2 rounded" 
+                     data-start="{{ segment.start }}" 
+                     data-end="{{ segment.end }}"
+                     data-segment-id="{{ loop.index0 }}">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm text-gray-500">
+                            {{ "%02d:%02d"|format(segment.start // 60, segment.start % 60) }} - 
+                            {{ "%02d:%02d"|format(segment.end // 60, segment.end % 60) }}
+                        </span>
+                        <button class="playButton text-blue-500 hover:text-blue-700 text-sm">
+                            ▶ Play
+                        </button>
+                    </div>
+                    <p class="text-gray-800">{{ segment.text }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            </div>
+        </div>
+
+        <!-- Hidden audio element 
+        <audio id="audioPlayer" src="/uploads/{{ filename }}" preload="auto"></audio> 
+        -->
+    <!--If current user is set, use it, else use the old method-->
+    
+    
+    <audio id="audioPlayer" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" preload="auto"></audio>
+
+    </div>
+
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const transcriptContainer = document.getElementById('transcriptContainer');
+        let currentSegment = null;
+        let isPlaying = false;
+        let checkTimeInterval = null;
+        let lastPlayedTime = 0; // Store the last played time
+
+        // Function to update button text
+        function updateButtonText(button, playing) {
+            button.textContent = playing ? '⏹ Stop' : '▶ Play';
+        }
+
+        // Function to highlight current segment
+        function highlightSegment(segmentElement, highlight) {
+            if (highlight) {
+                segmentElement.classList.add('segment-playing');
+            } else {
+                segmentElement.classList.remove('segment-playing');
+            }
+        }
+
+        // Function to find segment based on time
+        function findSegmentByTime(time) {
+            const segments = document.querySelectorAll('.segment-container');
+            return Array.from(segments).find(segment => {
+                const start = parseFloat(segment.dataset.start);
+                const end = parseFloat(segment.dataset.end);
+                return time >= start && time < end;
+            });
+        }
+
+        // Function to stop playback
+        function stopPlayback() {
+            lastPlayedTime = audioPlayer.currentTime; // Store the current time before stopping
+            audioPlayer.pause();
+            isPlaying = false;
+            if (currentSegment) {
+                const button = currentSegment.querySelector('.playButton');
+                updateButtonText(button, false);
+                highlightSegment(currentSegment, false);
+                currentSegment = null;
+            }
+            if (checkTimeInterval) {
+                clearInterval(checkTimeInterval);
+                checkTimeInterval = null;
+            }
+        }
+
+        // Function to play a specific segment
+        function playSegment(segmentElement, startTime = null) {
+            const start = parseFloat(segmentElement.dataset.start);
+            const end = parseFloat(segmentElement.dataset.end);
+            const button = segmentElement.querySelector('.playButton');
+
+            // If clicking the same segment that's playing, stop it
+            if (currentSegment === segmentElement && isPlaying) {
+                stopPlayback();
+                return;
+            }
+
+            // If another segment is playing, stop it
+            if (currentSegment && currentSegment !== segmentElement) {
+                const currentButton = currentSegment.querySelector('.playButton');
+                updateButtonText(currentButton, false);
+                highlightSegment(currentSegment, false);
+            }
+
+            // Clear any existing interval
+            if (checkTimeInterval) {
+                clearInterval(checkTimeInterval);
+            }
+
+            // Start playing the new segment
+            currentSegment = segmentElement;
+            isPlaying = true;
+            audioPlayer.currentTime = startTime !== null ? startTime : start;
+            audioPlayer.play();
+            updateButtonText(button, true);
+            highlightSegment(segmentElement, true);
+
+            // Scroll to the current segment
+            scrollToSegment(segmentElement);
+
+            // Set up interval to check time
+            checkTimeInterval = setInterval(() => {
+                if (!isPlaying) {
+                    clearInterval(checkTimeInterval);
+                    return;
+                }
+
+                if (audioPlayer.currentTime >= end) {
+                    clearInterval(checkTimeInterval);
+                    updateButtonText(button, false);
+                    highlightSegment(segmentElement, false);
+
+                    const nextSegment = segmentElement.nextElementSibling;
+                    if (nextSegment) {
+                        playSegment(nextSegment);
+                    } else {
+                        stopPlayback();
+                    }
+                }
+            }, 100);
+        }
+
+        // Add click handlers to all play buttons
+        document.querySelectorAll('.segment-container').forEach(segment => {
+            const button = segment.querySelector('.playButton');
+            button.addEventListener('click', () => {
+                lastPlayedTime = parseFloat(segment.dataset.start); // Update lastPlayedTime when clicking play
+                playSegment(segment);
+            });
+        });
+
+        // Handle audio ending
+        audioPlayer.addEventListener('ended', () => {
+            stopPlayback();
+        });
+
+        // Cleanup when leaving the page
+        window.addEventListener('beforeunload', () => {
+            audioPlayer.pause();
+            if (checkTimeInterval) {
+                clearInterval(checkTimeInterval);
+            }
+        });
+
+        // Show transcript container when audio is ready
+        audioPlayer.addEventListener('canplaythrough', () => {
+            transcriptContainer.style.display = 'block';
+        });
+
+        // Handle spacebar to play/pause
+        document.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            console.log(e.code, e.key);
+            
+            if (e.code === 'KeyP' || e.key.toLowerCase() === 'p' || e.code=="Space") {
+                
+                if (isPlaying) {
+                    stopPlayback();
+                } else {
+                    // Find the appropriate segment based on lastPlayedTime
+                    const segmentToPlay = findSegmentByTime(lastPlayedTime) || currentSegment;
+                    if (segmentToPlay) {
+                        playSegment(segmentToPlay, lastPlayedTime);
+                    }
+                }
+            }
+        });
+
+        // Add this function to handle smooth scrolling
+        function scrollToSegment(segment) {
+            const wrapper = document.querySelector('.transcript-wrapper');
+            const segmentRect = segment.getBoundingClientRect();
+            const wrapperRect = wrapper.getBoundingClientRect();
+            
+            // Calculate the scroll position to center the segment in the wrapper
+            const scrollTop = segment.offsetTop - wrapper.offsetTop - (wrapper.clientHeight / 2) + (segment.clientHeight / 2);
+            
+            wrapper.scrollTo({
+                top: scrollTop,
+                behavior: 'smooth'
+            });
+        }
+
+// Add these CSS rules to your existing style section
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    .container {
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .segment-container {
+        transition: background-color 0.3s ease;
+    }
+`;
+document.head.appendChild(styleSheet);  
+    </script>
+</body>
+</html>
