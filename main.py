@@ -14,6 +14,7 @@ import logging
 
 
 import subprocess
+import psutil 
 from flask import Flask, render_template, jsonify, request, Response, abort, session
 import secrets
 from werkzeug.utils import secure_filename
@@ -29,11 +30,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 transcription_service = None
 
 def get_transcription_service():
-    global transcription_service
-    if transcription_service is None:
-        #transcription_service = TranscriptionService()
-        transcription_service = None
-    return transcription_service
+    
+    return None
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 256 * 1024 * 1024
@@ -42,8 +40,9 @@ app.config['TRANSCRIPT_FOLDER'] = 'transcripts'
 transcript_manager = TranscriptManager(uploads_dir=app.config['UPLOAD_FOLDER'], transcripts_dir=app.config['TRANSCRIPT_FOLDER'])
 app.secret_key = secrets.token_hex(16)  # Required for session management
 
+# to be implemented with sqlite db
 app.config['users'] = {
-    "podcast": bcrypt.hashpw('addyourpassword'.encode('utf-8'), bcrypt.gensalt(10)),
+    "user":   bcrypt.hashpw('replace-with-your-password'.encode('utf-8'), bcrypt.gensalt(10)),
     }
 app.config["current_user"] = None
 
@@ -239,11 +238,11 @@ def upload_file():
         'message': 'File type not allowed'
     }), 400
 
-from transcription_service import TranscriptionService
+#from transcription_service import TranscriptionService
 
 # Initialize the transcription service
 
-transcription_service = TranscriptionService()
+#transcription_service = TranscriptionService()
 
 # Update your transcribe route to use the new service
 @app.route('/api/transcribe/<filename>', methods=['POST'])
@@ -254,6 +253,18 @@ def transcribe_audio(filename):
             'success': False,
             'message': 'Authentication required'
         }), 401
+
+    # Check if transcription_service.py is already running
+    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+        try:
+            if 'python3' in proc.info['cmdline'] and 'transcription_service.py' in proc.info['cmdline']:
+                app.logger.info(f'Process {proc.info["pid"]} is running transcription_service.py')
+                return jsonify({
+                    'success': False,
+                    'message': 'Another instance of the transcription service is already running.'
+                }), 500
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
 
     try:
         app.logger.info(f'Transcribing file: {filename}')
@@ -268,7 +279,7 @@ def transcribe_audio(filename):
         #service = get_transcription_service()
         #result = service.transcribe(file_path)
         # Run transcription service as a subprocess
-        app.logger.info(f'Running transcription service. python3 transcription_srvice.py "{file_path}" "{transcript_path}"')
+        app.logger.info(f'Running transcription service. python3 transcription_service.py "{file_path}" "{transcript_path}"')
         process = subprocess.run(
             ['python3', 'transcription_service.py', file_path, transcript_path],
             capture_output=True,
