@@ -11,7 +11,7 @@
             border-left: 4px solid #2196f3;  /* Blue left border */
         }
         .transcript-wrapper {
-            max-height: calc(80vh - 100px); /* Adjust based on your header height */
+            max-height: calc(70vh - 100px); /* Adjust based on your header height */
             overflow-y: auto;
             scroll-behavior: smooth;
         }
@@ -24,14 +24,129 @@
         .segment-container {
             transition: background-color 0.3s ease;
         }        
+/* Apply the custom font */
+body {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Add a subtle animation to the header */
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    header {
+        background-size: 200% 200%;
+        animation: gradientFlow 15s ease infinite;
+    }
+    
+    /* Add a subtle hover effect to the title */
+    h1 {
+        transition: text-shadow 0.3s ease;
+    }
+    
+    h1:hover {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Add a glass effect to the nav */
+    nav {
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+    }                
+    html {
+ scroll-behavior: smooth;
+ }
+ .container {
+ max-height: 100vh;
+ overflow-y: auto;
+ }
+ .segment-container {
+ transition: background-color 0.3s ease;
+ }
     </style>
+    <!-- Add this in the head section for the custom font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+
 </head>
 <body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <!-- Left Section: Logo, Title, and Navigation -->
+                <div class="flex items-center space-x-8">
+                    <!-- Logo and Title -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Microphone Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <div>
+                            <h1 class="text-4xl font-extrabold text-white tracking-wider">
+                                Whisper Read
+                            </h1>
+                            <p class="text-blue-100 text-sm mt-1">
+                                 <a href="https://reeyarn.li" class="hover:text-white text-blue-200 transition-colors text-sm">
+                                    Audio Transcription Made Simple
+                                </a>
+                            </p>
+                            
+                        </div>
+                    </div>
+    
+                    <!-- Navigation Links 
+                    <nav class="hidden md:flex space-x-6">
+                        
+                        
+                    </nav>-->
+                </div>
+    
+                <!-- Right Section: User Info and Logout -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <!-- User Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div class="text-sm font-medium text-blue-100" id="currentUser">
+                            Current User: None
+                        </div>
+                    </div>
+    
+                    <!-- Vertical Separator -->
+                    <div class="h-6 w-px bg-blue-300/30"></div>
+    
+                    <!-- Logout Button -->
+                    <button onclick="logout()" class="bg-red-500/90 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
     <div class="container mx-auto px-4 py-8">
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-3xl font-bold">{{ transcript.get('title', 'Untitled') }}</h1>
-                <h2 class="text-xl g-gray-500">使用 P 或 Space 播放/暂停</h2> 
+                <h2 class="text-xl g-gray-500">Press P or Space Key To Play or Pause</h2> 
                 <p class="text-gray-600 mt-2">File: {{ filename }}</p>
             </div>
         </div>
@@ -85,18 +200,63 @@
     <!--If current user is set, use it, else use the old method-->
     
     
-    <audio id="audioPlayer" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" preload="auto"></audio>
-
+    <!--audio id="audioPlayer" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" preload="auto"></audio-->
+    <audio id="audioPlayer" preload="auto" controls>
+        <source id="audioSource" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>    
     </div>
 
     <script>
         const audioPlayer = document.getElementById('audioPlayer');
+        const audioKey = 'audioPosition_' + '{{ user }}_{{ filename }}'; // Unique key for storage
+
+        // Load saved audio position
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedPosition = localStorage.getItem(audioKey);
+            if (savedPosition) {
+                audioPlayer.currentTime = parseFloat(savedPosition);
+            }
+        });
+
+        // Save audio position before unload
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem(audioKey, audioPlayer.currentTime);
+        });
+
+        // Optionally save position on pause
+        audioPlayer.addEventListener('pause', () => {
+            localStorage.setItem(audioKey, audioPlayer.currentTime);
+        });
+
         const transcriptContainer = document.getElementById('transcriptContainer');
         let currentSegment = null;
         let isPlaying = false;
         let checkTimeInterval = null;
         let lastPlayedTime = 0; // Store the last played time
 
+        // Function to retrieve a specific cookie's value
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        // Update the current user display in the header
+        function updateUserDisplay() {
+            const currentUserElement = document.getElementById('currentUser');
+            const username = getCookie('username');
+            
+            if (username) {
+                currentUserElement.textContent = `Current User: ${username}`;
+            } else {
+                currentUserElement.textContent = 'Current User: None';
+            }
+        }
+
+        // Call updateUserDisplay when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserDisplay();
+        });        
         // Function to update button text
         function updateButtonText(button, playing) {
             button.textContent = playing ? '⏹ Stop' : '▶ Play';

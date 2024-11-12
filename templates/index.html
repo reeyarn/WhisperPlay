@@ -87,28 +87,57 @@ body {
     <header class="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 shadow-lg">
         <div class="container mx-auto px-4 py-6">
             <div class="flex items-center justify-between">
-                <!-- Logo and Title -->
-                <div class="flex items-center space-x-4">
-                    <!-- Microphone Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                    <div>
-                        <h1 class="text-4xl font-extrabold text-white tracking-wider">
-                            Whisper Read
-                        </h1>
-                        <p class="text-blue-100 text-sm mt-1">
-                            Audio Transcription Made Simple
-                        </p>
+                <!-- Left Section: Logo, Title, and Navigation -->
+                <div class="flex items-center space-x-8">
+                    <!-- Logo and Title -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Microphone Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <div>
+                            <h1 class="text-4xl font-extrabold text-white tracking-wider">
+                                Whisper Read
+                            </h1>
+                            <p class="text-blue-100 text-sm mt-1">
+                                 <a href="https://reeyarn.li" class="hover:text-white text-blue-200 transition-colors text-sm">
+                                    Audio Transcription Made Simple
+                                </a>
+                            </p>
+                            
+                        </div>
                     </div>
+    
+                    <!-- Navigation Links 
+                    <nav class="hidden md:flex space-x-6">
+                        
+                        
+                    </nav>-->
                 </div>
-                
-                <!-- Optional: Add navigation links -->
-                <nav class="hidden md:flex space-x-6">
-                    <!--a href="#" class="text-white hover:text-blue-200 transition-colors">Home</a-->
-                    <a href="https://reeyarn.li" class="text-white hover:text-blue-200 transition-colors">About the Developer</a>
-                    <a href="mailto:reeyarn+whisperread@gmail.com" class="text-white hover:text-blue-200 transition-colors">Contact</a>
-                </nav>
+    
+                <!-- Right Section: User Info and Logout -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <!-- User Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div class="text-sm font-medium text-blue-100" id="currentUser">
+                            Current User: None
+                        </div>
+                    </div>
+    
+                    <!-- Vertical Separator -->
+                    <div class="h-6 w-px bg-blue-300/30"></div>
+    
+                    <!-- Logout Button -->
+                    <button onclick="logout()" class="bg-red-500/90 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -152,27 +181,20 @@ body {
             <div class="flex justify-between items-start mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-3">Audio Transcription</h1>
-                    <div class="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
+                    <!--div class="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         <div class="text-xl font-bold text-blue-700" id="currentUser">Current User: None</div>
-                    </div>
+                    </div-->
                 </div>
-                <button onclick="logout()" 
-                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Logout
-                </button>
             </div>
 
             <!-- Upload Section -->
             <div class="bg-blue-50 rounded-xl p-6 mb-8">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Upload New Audio</h2>
                 <p class="text-gray-600 mb-4">Choose a file, then click "Upload and Transcribe"</p>
-                <p class="text-gray-600 mb-6">选择文件，再点击 Upload and Transcribe</p>
+                <!--p class="text-gray-600 mb-6">选择文件，再点击 Upload and Transcribe</p-->
 
                 <form id="uploadForm" class="space-y-6" enctype="multipart/form-data">
                     <div class="border-2 border-dashed border-blue-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors duration-200">
@@ -334,35 +356,39 @@ body {
         }
 
 
-        async function checkAuth() {
-            const sessionToken = getCookie('sessionToken');
-            if (!sessionToken) {
-                console.log('No session token found');
-                showLoginForm();
-                return;
-            }
+            async function checkAuth() {
+                const sessionToken = getCookie('sessionToken');
+                const username = getCookie('username');
+                
+                if (!sessionToken || !username) {
+                    console.log('No session token or username found');
+                    showLoginForm();
+                    return;
+                }
 
-            // Optionally verify the token with the server if needed
-            try {
-                const response = await fetch('/api/check-auth', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${sessionToken}`
-                    },
-                });
+                try {
+                    const response = await fetch('/api/check-auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${sessionToken}`
+                        },
+                    });
 
-                const data = await response.json();
-                if (data.authenticated) {
-                    showMainContent(data.user);
-                } else {
+                    const data = await response.json();
+                    if (data.authenticated) {
+                        showMainContent(username);
+                    } else {
+                        // Clear cookies if authentication fails
+                        setCookie('sessionToken', '', 0);
+                        setCookie('username', '', 0);
+                        showLoginForm();
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
                     showLoginForm();
                 }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                showLoginForm();
             }
-        }
 
         function showLoginForm() {
             loginContainer.classList.remove('hidden');
@@ -397,7 +423,9 @@ body {
                 
                 if (data.success) {
                     showMainContent();
-                    document.cookie = `sessionToken=${data.token}; path=/; max-age=72000`; // 20 hour expiration
+                    // Set both cookies
+                    setCookie('sessionToken', data.token, 72000); // 20 hour expiration
+                    setCookie('username', username, 72000); // 20 hour expiration
                     showMainContent(username);
                     currentUser.textContent = `Current User: ${username}`;
                     loginError.classList.add('hidden');
@@ -419,7 +447,8 @@ body {
                 // Clear any sensitive data
                 // document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
-                document.cookie = "sessionToken=; path=/; max-age=0"; // Clear the cookie
+                setCookie('sessionToken', '', 0);
+                setCookie('username', '', 0);
 
 
             } catch (error) {
@@ -714,7 +743,9 @@ body {
         jobs.forEach(job => jobList.appendChild(job));
         isAscending = !isAscending; // Toggle sorting direction
     });
-
+    function setCookie(name, value, maxAge) {
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`;
+}
     </script>
 </body>
 </html>
