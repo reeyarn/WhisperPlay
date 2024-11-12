@@ -73,6 +73,18 @@ body {
  .segment-container {
  transition: background-color 0.3s ease;
  }
+ .animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
     </style>
     <!-- Add this in the head section for the custom font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -96,7 +108,7 @@ body {
                         </svg>
                         <div>
                             <h1 class="text-4xl font-extrabold text-white tracking-wider">
-                                Whisper Read
+                                Whisper Play
                             </h1>
                             <p class="text-blue-100 text-sm mt-1">
                                  <a href="https://reeyarn.li" class="hover:text-white text-blue-200 transition-colors text-sm">
@@ -155,6 +167,18 @@ body {
 
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl">Transcript: </h2>
+
+                <div id="audioContainer" style="display: none;">
+                <audio id="audioPlayer" preload="auto" controls>
+                    <source id="audioSource" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>    
+                </div>
+                <div id="loadingSpinner" class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                    <span class="ml-3 text-gray-600">Loading audio file...</span>
+                </div>
+            
             <a href="/" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
                 Back to List
             </a>
@@ -170,9 +194,11 @@ body {
                 </p>
             </div>
 
+            <!-- Loading Spinner -->
+            
             <!-- Transcript content -->
             <div class="transcript-wrapper">
-            <div class="space-y-4" id="transcriptContainer" style="display: none;">
+            <div class="space-y-4" id="transcriptContainer" style="display: block;">
                 {% for segment in transcript.segments %}
                 <div class="segment-container hover:bg-gray-50 p-2 rounded" 
                      data-start="{{ segment.start }}" 
@@ -201,16 +227,27 @@ body {
     
     
     <!--audio id="audioPlayer" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" preload="auto"></audio-->
-    <audio id="audioPlayer" preload="auto" controls>
-        <source id="audioSource" src="{{ url_for('serve_audio_user', user=user, filename=filename) if user else url_for('serve_audio_anonymous', filename=filename) }}" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>    
     </div>
 
     <script>
         const audioPlayer = document.getElementById('audioPlayer');
         const audioKey = 'audioPosition_' + '{{ user }}_{{ filename }}'; // Unique key for storage
+        const transcriptContainer = document.getElementById('transcriptContainer');
+        const audioContainer = document.getElementById('audioContainer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
 
+        // Show loading spinner initially
+        loadingSpinner.style.display = 'flex';
+        //transcriptContainer.style.display = 'none';
+        //audioContainer.style.display = 'none';
+        let currentSegment = null;
+        let isPlaying = false;
+        let checkTimeInterval = null;
+        let lastPlayedTime = 0; // Store the last played time
+
+
+        // Audio loading states
+        let isAudioLoaded = false;
         // Load saved audio position
         document.addEventListener('DOMContentLoaded', () => {
             const savedPosition = localStorage.getItem(audioKey);
@@ -229,11 +266,7 @@ body {
             localStorage.setItem(audioKey, audioPlayer.currentTime);
         });
 
-        const transcriptContainer = document.getElementById('transcriptContainer');
-        let currentSegment = null;
-        let isPlaying = false;
-        let checkTimeInterval = null;
-        let lastPlayedTime = 0; // Store the last played time
+        
 
         // Function to retrieve a specific cookie's value
         function getCookie(name) {
@@ -364,6 +397,16 @@ body {
             });
         });
 
+        // Function to handle audio loading
+        function handleAudioLoading() {
+            console.log('Audio loaded');
+            audioContainer.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+            isAudioLoaded = true;
+        }
+        audioPlayer.addEventListener('canplaythrough', handleAudioLoading);
+        audioPlayer.addEventListener('loadeddata', handleAudioLoading);
+
         // Handle audio ending
         audioPlayer.addEventListener('ended', () => {
             stopPlayback();
@@ -379,7 +422,9 @@ body {
 
         // Show transcript container when audio is ready
         audioPlayer.addEventListener('canplaythrough', () => {
-            transcriptContainer.style.display = 'block';
+            audioContainer.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+
         });
 
         // Handle spacebar to play/pause
@@ -400,6 +445,39 @@ body {
                 }
             }
         });
+        // Handle loading errors
+        
+        audioPlayer.addEventListener('error', (e) => {
+            console.error('Audio loading error:', e);
+            loadingSpinner.innerHTML = `
+                <div class="text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="ml-2">Error loading audio file. Please try refreshing the page.</span>
+                </div>
+            `;
+        });
+
+        // Check if audio is already loaded
+        if (audioPlayer.readyState >= 3) {
+            handleAudioLoading();
+        }
+        // Add loading timeout warning
+        // Add loading timeout warning
+        setTimeout(() => {
+            if (!isAudioLoaded) {
+                loadingSpinner.innerHTML += `
+                    <div class="text-yellow-500 mt-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span class="ml-2">Loading is taking longer than expected. Please check your connection.</span>
+                    </div>
+                `;
+            }
+        }, 20000); // Show warning after 20 seconds
+
 
         // Add this function to handle smooth scrolling
         function scrollToSegment(segment) {

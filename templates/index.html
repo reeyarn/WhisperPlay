@@ -97,7 +97,7 @@ body {
                         </svg>
                         <div>
                             <h1 class="text-4xl font-extrabold text-white tracking-wider">
-                                Whisper Read
+                                Whisper Play
                             </h1>
                             <p class="text-blue-100 text-sm mt-1">
                                  <a href="https://reeyarn.li" class="hover:text-white text-blue-200 transition-colors text-sm">
@@ -191,6 +191,10 @@ body {
             </div>
 
             <!-- Upload Section -->
+                     <!-- File Upload Section -->
+        <div class="space-x-2">
+            <!-- ... existing buttons ... -->
+
             <div class="bg-blue-50 rounded-xl p-6 mb-8">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Upload New Audio</h2>
                 <p class="text-gray-600 mb-4">Choose a file, then click "Upload and Transcribe"</p>
@@ -242,98 +246,98 @@ body {
                 </form>
             </div>
         </div>
+    </div>
+
 
     </div>
-        <h1 class="text-3xl font-bold mb-6">Audio Transcriptions</h1>
-        <!-- Jobs List -->
-         <!-- Add this button above the jobs list -->
-        <button id="sortButton" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-4">
-            Sort by Title
-        </button>
+    
 
-        <button id="sortDateButton" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-4">
-            Sort by Date
-        </button>
 
+
+    <div class="container mx-auto px-4 py-8" id="transcriptContainer">
+        <!-- Transcript Header -->
+        <div id="transcriptHeaderContainer">
+            <h1 class="text-3xl font-bold mb-6">Audio Transcriptions</h1>
+            <!-- Jobs List -->
+            <button id="sortButton" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-4">
+                Sort by Title
+            </button>
+            <button id="sortDateButton" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-4">
+                Sort by Date
+            </button>
+        </div>
 
         <div class="space-y-4" id="jobsList">
             {% if jobs %}
-                {% for job in jobs %}
-                    <div class="border rounded-lg p-4 {% if job.has_transcript %}bg-green-50{% else %}bg-gray-50{% endif %}">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-grow">
-                                <h3 class="font-semibold">
-                                    {% if job.has_transcript %}
-                                    Click to Open and Play: <br><br>
-                                    <a href="{% if job.user %}/transcript/{{ job.user }}/{% else %}/transcript_anonymous/{% endif %}{{ job.filename }}" 
-                                    target="_blank" rel="noopener noreferrer"  class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
-                                       {{ job.title }}
-                                    </a>
-                                    <p>&nbsp;</p>
-                                    {% else %}
-                                        {{ job.filename }}
-                                    {% endif %}
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    {{ job.filename }}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    Uploaded: {{ job.upload_time|datetime }}
-                                </p>
-                                {% if job.has_transcript %}
-                                    <p class="text-sm text-green-600">
-                                        Transcription completed
-                                    </p>
-                                {% else %}
-                                    <p class="text-sm text-gray-600">
-                                        Pending transcription
-                                    </p>
-                                {% endif %}
-                                <!-- Title input section -->
-                                <div class="mt-2 space-y-2">
-                                    <input type="text" 
-                                           class="title-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                           placeholder="Enter title"
-                                           value="{{ job.title }}"
-                                           data-filename="{{ job.filename }}">
-                                           <div class="message-container hidden transition-all duration-300" data-filename="{{ job.filename }}">
-                                            <p class="text-sm"></p>
-                                        </div>
-                                       
-                                    <button onclick="updateTitle('{{ job.filename }}')" 
-                                            class="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-600 transition-colors">
-                                        Update Title
-                                    </button>
-                                    <button onclick="markJobDeleted('{{ job.filename }}')" 
-                                            class="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600 transition-colors">
-                                        Delete Job
-                                    </button>
-                                </div>
+            {% for job in jobs %}
+            <div class="border rounded-lg p-4 {% if job.has_transcript %}bg-green-50{% else %}bg-gray-50{% endif %}">
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
+                        <h3 class="font-semibold">
+                            {% if job.has_transcript %}
+                            Click to Open and Play: <br><br>
+                            <a href="{% if job.user %}/transcript/{{ job.user }}/{% else %}/transcript_anonymous/{% endif %}{{ job.filename }}"
+                               target="_blank" rel="noopener noreferrer" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                                {{ job.title }}
+                            </a>
+                            <p>&nbsp;</p>
+                            {% else %}
+                            {{ job.filename }}
+                            {% endif %}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            {{ job.filename }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            Uploaded: {{ job.upload_time|datetime }}
+                        </p>
+                        {% if job.has_transcript %}
+                        <p class="text-sm text-green-600">
+                            Transcription completed
+                        </p>
+                        {% else %}
+                        <p class="text-sm text-gray-600">
+                            Pending transcription
+                        </p>
+                        {% endif %}
+                        <!-- Title input section -->
+                        <div class="mt-2 space-y-2">
+                            <input type="text"
+                                   class="title-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                   placeholder="Enter title"
+                                   value="{{ job.title }}"
+                                   data-filename="{{ job.filename }}">
+                            <div class="message-container hidden transition-all duration-300" data-filename="{{ job.filename }}">
+                                <p class="text-sm"></p>
                             </div>
-                            
-                            <div class="space-x-2">
-                                <!-- ... existing buttons ... -->
-                            </div>
+                            <button onclick="updateTitle('{{ job.filename }}')"
+                                    class="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-600 transition-colors">
+                                Update Title
+                            </button>
+                            <button onclick="markJobDeleted('{{ job.filename }}')"
+                                    class="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600 transition-colors">
+                                Delete Job
+                            </button>
                         </div>
                     </div>
-                {% endfor %}
+                    <div class="space-x-2">
+                        <!-- ... existing buttons ... -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
             {% else %}
-                <p class="text-gray-500 text-center py-4">No jobs found</p>
+            <p class="text-gray-500 text-center py-4">No jobs found</p>
             {% endif %}
         </div>
-
-
-        <!-- File Upload Section -->
-        <div class="space-x-2">
-            <!-- ... existing buttons ... -->
-        </div>
-        <!-- Add this near the top of your content div -->
-        <div class="bg-gray-100 p-4 rounded-lg mb-6">
+    </div>
+        
+        <!--div class="bg-gray-100 p-4 rounded-lg mb-6">
             <h2 class="text-lg font-semibold mb-2">Transcription Model Info</h2>
             <div id="modelInfo" class="text-sm text-gray-600">
                 Loading model information...
             </div>
-        </div>
+        </div-->
 
 
 
