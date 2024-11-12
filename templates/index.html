@@ -35,9 +35,84 @@
         .hidden {
             display: none;
         }
+/* Apply the custom font */
+body {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Add a subtle animation to the header */
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    header {
+        background-size: 200% 200%;
+        animation: gradientFlow 15s ease infinite;
+    }
+    
+    /* Add a subtle hover effect to the title */
+    h1 {
+        transition: text-shadow 0.3s ease;
+    }
+    
+    h1:hover {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Add a glass effect to the nav */
+    nav {
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+    }        
     </style>    
+    <!-- Add this in the head section for the custom font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
 </head>
 <body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <!-- Logo and Title -->
+                <div class="flex items-center space-x-4">
+                    <!-- Microphone Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                    <div>
+                        <h1 class="text-4xl font-extrabold text-white tracking-wider">
+                            Whisper Read
+                        </h1>
+                        <p class="text-blue-100 text-sm mt-1">
+                            Audio Transcription Made Simple
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Optional: Add navigation links -->
+                <nav class="hidden md:flex space-x-6">
+                    <!--a href="#" class="text-white hover:text-blue-200 transition-colors">Home</a-->
+                    <a href="https://reeyarn.li" class="text-white hover:text-blue-200 transition-colors">About the Developer</a>
+                    <a href="mailto:reeyarn+whisperread@gmail.com" class="text-white hover:text-blue-200 transition-colors">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
     <div class="container mx-auto px-4 py-8">
 
         <!-- Login Form -->
@@ -252,11 +327,32 @@
         // Check authentication status on page load
         checkAuth();
 
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+
         async function checkAuth() {
+            const sessionToken = getCookie('sessionToken');
+            if (!sessionToken) {
+                console.log('No session token found');
+                showLoginForm();
+                return;
+            }
+
+            // Optionally verify the token with the server if needed
             try {
-                const response = await fetch('/api/check-auth');
+                const response = await fetch('/api/check-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`
+                    },
+                });
+
                 const data = await response.json();
-                
                 if (data.authenticated) {
                     showMainContent(data.user);
                 } else {
@@ -301,6 +397,9 @@
                 
                 if (data.success) {
                     showMainContent();
+                    document.cookie = `sessionToken=${data.token}; path=/; max-age=72000`; // 20 hour expiration
+                    showMainContent(username);
+                    currentUser.textContent = `Current User: ${username}`;
                     loginError.classList.add('hidden');
                 } else {
                     loginError.textContent = data.message;
@@ -310,7 +409,7 @@
                 loginError.textContent = 'Login failed. Please try again.';
                 loginError.classList.remove('hidden');
             }
-            location.reload();
+            //location.reload();
         });
 
         async function logout() {
@@ -320,6 +419,7 @@
                 // Clear any sensitive data
                 // document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
+                document.cookie = "sessionToken=; path=/; max-age=0"; // Clear the cookie
 
 
             } catch (error) {
@@ -389,12 +489,12 @@
                     if (data.success) {
                         location.reload();
                     } else {
-                            alert('Transcription failed: ' + data.message);
+                        showMessage('Transcription failed: ' + data.message);
                         }
                     })
                     .catch(error => alert('Error: ' + error));
                 } catch (error) {
-                    alert('Error transcribing: ' + error);
+                    showMessage('Error transcribing: ' + error);
                 }
                 
                 loading.style.display = 'none';
@@ -506,22 +606,24 @@
             alert('Error updating title: ' + error);
         }
     }    
-    function showMessage(filename, message, isSuccess = true) {
-        const messageContainer = document.querySelector(`.message-container[data-filename="${filename}"]`);
-        const messageParagraph = messageContainer.querySelector('p');
-        
-        // Set message and style
-        messageParagraph.textContent = message;
-        messageParagraph.className = `text-sm ${isSuccess ? 'text-green-600' : 'text-red-600'}`;
-        
-        // Show message
-        messageContainer.classList.remove('hidden');
-        
-        // Hide message after 3 seconds
-        setTimeout(() => {
-            messageContainer.classList.add('hidden');
-            }, 10000);
+        function showMessage(filename, message, isSuccess = true) {
+            const messageContainer = document.querySelector(`.message-container[data-filename="${filename}"]`);
+            const messageParagraph = messageContainer.querySelector('p');
+            
+            // Set message and style
+            messageParagraph.textContent = message;
+            messageParagraph.className = `text-sm ${isSuccess ? 'text-green-600' : 'text-red-600'}`;
+            
+            // Show message
+            messageContainer.classList.remove('hidden');
+            
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+                }, 10000);
         }    
+
+
         async function markJobDeleted(filename) {
         // Check if user is authenticated
         const authResponse = await fetch('/api/check-auth');
